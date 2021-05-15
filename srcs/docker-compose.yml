@@ -1,0 +1,17 @@
+version : '3'
+services:
+
+  nginx:
+    image: 
+
+  mariadb:
+    image:
+    volumes:
+      -db_data:/home/wluong/data
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: aaa
+      MY_SQL_DATABASE: wordpress
+      MY_SQL_USER: wordpress
+      MY_SQL_PASSWORD: wordpress
+    
