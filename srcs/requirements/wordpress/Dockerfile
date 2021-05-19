@@ -14,7 +14,7 @@ RUN		apt-get install php7.3-fpm -y
 
 RUN	wget	https://wordpress.org/latest.tar.gz
 RUN	tar		-xvf latest.tar.gz
-RUN	mv		wordpress/ /var/www/html
+RUN	mv		wordpress/ /var/www/
 RUN	rm		latest.tar.gz
 
 RUN chown -R www-data:www-data /var/www/*

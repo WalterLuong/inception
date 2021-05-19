@@ -1,17 +1,39 @@
-version : '3'
+version : "3"
+
 services:
 
-  nginx:
-    image: 
+	nginx:
+		build:
+			context: ./nginx
+		image: nginx
+		container_name: nginx_container
+		environment: 
+			-
+		
 
-  mariadb:
-    image:
-    volumes:
-      -db_data:/home/wluong/data
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: aaa
-      MY_SQL_DATABASE: wordpress
-      MY_SQL_USER: wordpress
-      MY_SQL_PASSWORD: wordpress
-    
+	mariadb:
+		build:
+			context: ./mariadb
+		image: mariadb
+		container_name: mariadb_container
+		environment:
+			- MYSQL_ROOT_PASSWORD: $(MYSQL_ROOT_PASSWORD)
+			- MYSQL_DATABASE: $(MYSQL_DATABASE)
+			- MYSQL_USER: $(MYSQL_USER)
+			- MYSQL_PASSWORD: $(MYSQL_PASSWORD)
+		volumes:
+			- mariadb-data:/home/wluong/mysql/data
+		restart: unless-stopped
+
+	wordpress:
+		depends_on:
+			- mariadb
+		build:
+			context: ./wordpress
+		image: wordpress
+		container_name: wordpress_container
+		environment: 
+			-
+		volumes:
+			-
+		restart: unless-stopped

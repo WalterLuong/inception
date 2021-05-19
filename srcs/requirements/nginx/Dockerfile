@@ -13,4 +13,4 @@ RUN		apt-get install wget -y
 
 RUN apt-get install nginx -y
 
-EXPOSE 80 443
+EXPOSE 443
