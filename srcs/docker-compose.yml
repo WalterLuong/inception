@@ -1,19 +1,20 @@
 version : "3"
 
 services:
-
-	nginx:
+  nginx:
 		build:
-			context: ./nginx
+			context: ./requirements/nginx
 		image: nginx
 		container_name: nginx_container
+    ports:
+      - "443:443"
 		environment: 
 			-
 		
 
 	mariadb:
 		build:
-			context: ./mariadb
+			context: ./requirements/mariadb
 		image: mariadb
 		container_name: mariadb_container
 		environment:
@@ -22,14 +23,14 @@ services:
 			- MYSQL_USER: $(MYSQL_USER)
 			- MYSQL_PASSWORD: $(MYSQL_PASSWORD)
 		volumes:
-			- mariadb-data:/home/wluong/mysql/data
+			- mariadb-data:/var/lib/mysql
 		restart: unless-stopped
 
 	wordpress:
 		depends_on:
 			- mariadb
 		build:
-			context: ./wordpress
+			context: ./requirements/wordpress
 		image: wordpress
 		container_name: wordpress_container
 		environment: 
