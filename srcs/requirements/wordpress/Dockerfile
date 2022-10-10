@@ -1,27 +1,52 @@
 FROM debian:buster
 
-LABEL maintainer="wluong"
+LABEL	maintainer="wluong@student.42.fr"
 
-#UPDATING
+RUN apt update && \
+    apt upgrade -y && \
+    apt autoremove && \
+    apt install -y wget \
+        mariadb-client \
+        php7.3-fpm \
+	php7.3-mysqli \
+	php7.3-mbstring \
+	php7.3-pdo \
+        php-curl \
+        php-gd \
+        php-mbstring \
+        php-xml \
+        php-xmlrpc \
+        php-soap \
+        php-intl \
+        php-zip
 
-RUN		apt-get update
-RUN		apt-get upgrade -y
-RUN		apt-get install openssl -y
-RUN		apt-get install wget -y
-RUN		apt-get install php7.3-fpm -y
+RUN     wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \ 
+        php wp-cli.phar --info && chmod +x wp-cli.phar && \
+        mv wp-cli.phar /usr/bin/wp && \
+        chmod 755 /usr/bin/wp && \
+        mkdir -p /run/php && \
+        mkdir -p /var/log/php-fpm /var/www/html
 
-#WORDPRESS
+RUN     wp --path=/var/www/html --allow-root core download
 
-RUN	wget	https://wordpress.org/latest.tar.gz
-RUN	tar		-xvf latest.tar.gz
-RUN	mv		wordpress/ /var/www/
-RUN	rm		latest.tar.gz
+RUN adduser \
+   --system \
+   --shell /bin/bash \
+   --gecos "nginx" \
+   --group \
+   --disabled-password \
+   nginx
 
-RUN chown -R www-data:www-data /var/www/*
-RUN chmod -R 755 /var/www/*
+RUN chown -R nginx:nginx /var/www/
 
-#START
-COPY	./tools/run.sh ./
-CMD		bash run.sh
+RUN service php7.3-fpm start
+
+COPY    ./conf/www.conf /etc/php/7.3/fpm/pool.d/www.conf
+
+COPY ./tools/entrypoint.sh /run/php
+
+RUN chmod 777 run/php/entrypoint.sh
 
 EXPOSE 9000
+
+ENTRYPOINT [ "bash", "/run/php/entrypoint.sh" ]

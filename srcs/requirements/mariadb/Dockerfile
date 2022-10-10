@@ -1,22 +1,23 @@
-FROM debian:buster
+FROM alpine:3.13
 
 LABEL maintainer="wluong"
 
-#UPDATING
+RUN apk update && \
+    apk -U  upgrade && \
+    apk add mariadb mariadb-client
 
-RUN 	apt-get update
-RUN 	apt-get upgrade -y
-RUN 	apt-get install openssl -y
-RUN		apt-get install wget -y
+RUN rm -rf /var/lib/mysql && \
+    mkdir -p /run/mysqld /var/lib/mysql && \
+    chown -R mysql:mysql /run/mysqld/ /var/lib/mysql/ && \
+    chmod 777 /run/mysqld  /var/lib/mysql
 
+COPY ./conf/mariadb-server.cnf /etc/mysql/my.cnf
+RUN chown -R mysql:mysql /etc/mysql
 
-#MYSQL
+COPY ./tools/run.sh /home/script/run.sh
 
-RUN 	apt-get install -y mariadb-server
-
-#START
-
-COPY	./tools/run.sh ./
-CMD		bash run.sh
+RUN chmod 777 /home/script/run.sh
 
 EXPOSE 3306
+
+ENTRYPOINT [ "sh", "/home/script/run.sh" ]

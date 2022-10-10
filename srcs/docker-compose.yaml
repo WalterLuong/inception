@@ -1,0 +1,74 @@
+version : '3'
+
+services:
+
+    mariadb:
+        build: ./requirements/mariadb
+        container_name: mariadb_container
+        image: mariadb
+        volumes: 
+            - mysql-volume:/var/lib/mysql
+        ports:
+            - 3306:3306
+        environment:
+            ROOT_PASSWORD: ${ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}    
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_PATH: ${MYSQL_PATH}
+        networks:
+            - custom-network
+        restart: always
+
+    wordpress:
+        build: ./requirements/wordpress
+        container_name: wordpress_container
+        image: wordpress
+        volumes:
+           - wordpress-volume:/var/www/html
+        depends_on:
+         - mariadb
+        ports:
+            - 9000:9000
+        environment:
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            WP_PATH: ${WP_PATH}
+            MY_URL: ${MY_URL}
+            DB_HOST: ${DB_HOST}
+            TITLE: ${TITLE}
+        networks:
+            - custom-network
+        restart: always
+                    
+    nginx:
+        build: ./requirements/nginx
+        container_name: nginx_container
+        image: nginx
+        volumes:
+            - wordpress-volume:/var/www/html
+        ports:
+            - 443:443
+        depends_on:
+            - wordpress
+        networks:
+            - custom-network
+        restart: always
+
+networks:
+    custom-network:
+
+volumes:
+    wordpress-volume:
+        driver: local
+        driver_opts:
+            type: none
+            device: ${WP_VOLUME_PATH}
+            o: bind
+    mysql-volume:
+        driver: local
+        driver_opts:
+            type: none
+            device: ${SQL_VOLUME_PATH}
+            o: bind
